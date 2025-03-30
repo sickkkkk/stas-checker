@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   stastracker:
     build: .
-    container_name: stastracker
-    environment:
+    env_file:
       - .env
+    container_name: stastracker
     expose:
       - "5000"
 
@@ -17,4 +15,4 @@ services:
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
-      - company-tracker
+      - stastracker
