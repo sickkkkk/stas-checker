@@ -176,3 +176,5 @@ cython_debug/
 
 status.html
 out.json
+deploy.pem
+*-original.json
