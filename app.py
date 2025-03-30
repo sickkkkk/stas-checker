@@ -7,9 +7,12 @@ import threading
 import time
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 load_dotenv()
 app = Flask(__name__)
+# Trust X-Forwarded headers from the proxy (adjust values if needed)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+thread_started = False  # global guard
 
 API_KEY = os.getenv("API_KEY")
 COMPANY_ID = os.getenv("COMPANY_ID", "666")
@@ -18,7 +21,6 @@ FUND_AMOUNT = os.getenv("FUND_AMOUNT", "0")
 TOTAL_DEBT = float(os.getenv("TOTAL_DEBT", "5000000"))
 BASELINE_PATH = os.getenv("BASELINE_PATH", "baseline.json")
 
-# store recent changes in memory
 latest_changes = []
 
 
@@ -122,7 +124,6 @@ def load_baseline():
 
 def fetch_current_state(company_number):
     auth = HTTPBasicAuth(API_KEY, '')
-
     status = None
     filings = []
 
@@ -187,6 +188,8 @@ def tracking_loop():
             print("No changes.")
         time.sleep(3600)
 
+# Starts tracking thread and app server
 threading.Thread(target=tracking_loop, daemon=True).start()
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
