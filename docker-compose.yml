@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  stastracker:
+    build: .
+    container_name: stastracker
+    environment:
+      - .env
+    expose:
+      - "5000"
+
+  haproxy:
+    image: haproxy:alpine
+    container_name: haproxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - company-tracker
